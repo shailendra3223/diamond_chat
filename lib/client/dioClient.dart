@@ -9,8 +9,9 @@ class DioClient {
 
   static BaseOptions options =  BaseOptions(
       baseUrl: ConstantBaseUrl.baseurl,
-      connectTimeout: 20000,
-      receiveTimeout: 300,
+      receiveDataWhenStatusError: true,
+      connectTimeout: 60*1000, // 60 seconds
+      receiveTimeout: 60*1000
 
   );
 

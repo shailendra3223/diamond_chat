@@ -2,12 +2,17 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:diamond_chat/game_page/result_page.dart';
+import 'package:diamond_chat/model/user_model.dart';
+import 'package:diamond_chat/preferance/PrefsConst.dart';
+import 'package:diamond_chat/preferance/pref.dart';
+import 'package:diamond_chat/preferance/sharepreference_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/pagecontroller.dart';
 import '../model/questions_example.dart';
-import 'login.dart';
+import '../ui/chat/user_chat_list.dart';
+import '../ui/login/login.dart';
 
 
 class GamePageScreen extends GetView<gamePageController> {
@@ -29,8 +34,10 @@ class GamePageScreen extends GetView<gamePageController> {
               Icons.chat,
               color: Colors.white,
             ),
-            onPressed: () {
-              Get.to(()=>LoginPage());
+            onPressed: ()async {
+              final isLogin =await SharedPreferencesHelper().getBool(PrefsConst.logInSaved);
+               Get.off(()=>isLogin??false ?userChatListPage():LoginPage());
+            //  Navigator.push(context, MaterialPageRoute(builder: (context)=>isLogin??false ?userChatListPage():LoginPage()));
             },
           )
         ],),
