@@ -1,11 +1,11 @@
-class UserList {
+class ForwardChatUserResponse {
   List<Result>? result;
   int? status;
   String? message;
 
-  UserList({this.result, this.status, this.message});
+  ForwardChatUserResponse({this.result, this.status, this.message});
 
-  UserList.fromJson(Map<String, dynamic> json) {
+  ForwardChatUserResponse.fromJson(Map<String, dynamic> json) {
     if (json['result'] != null) {
       result = <Result>[];
       json['result'].forEach((v) {
@@ -28,35 +28,25 @@ class UserList {
 }
 
 class Result {
-  int? userId;
-  String? profileImgPath;
+  int? chatUserID;
   String? fullName;
-  String? message;
-  String? createdDate;
+  String? profileImgPath;
+  bool? isSelected = false;
 
-  Result(
-      {this.userId,
-        this.profileImgPath,
-        this.fullName,
-        this.message,
-        this.createdDate});
+  Result({this.chatUserID, this.fullName, this.profileImgPath,this.isSelected});
 
   Result.fromJson(Map<String, dynamic> json) {
-    userId = json['userId']??"";
-    profileImgPath = json['profileImgPath']??"";
-    fullName = json['fullName']??"";
-    message = json['message']??"";
-    createdDate = json['createdDate']??"";
+    chatUserID = json['chatUserID'];
+    fullName = json['fullName'];
+    isSelected = false;
+    profileImgPath = json['profileImgPath'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['userId'] = this.userId;
-    data['profileImgPath'] = this.profileImgPath;
+    data['chatUserID'] = this.chatUserID;
     data['fullName'] = this.fullName;
-    data['message'] = this.message;
-    data['createdDate'] = this.createdDate;
+    data['profileImgPath'] = this.profileImgPath;
     return data;
   }
 }
-

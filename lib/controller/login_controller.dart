@@ -12,7 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../game_page/game_page.dart';
-import '../ui/chat/user_chat_list.dart';
+import '../ui/chat/home_screen.dart';
 
 
 class LoginController extends GetxController {
@@ -34,7 +34,7 @@ class LoginController extends GetxController {
           colorText: Colors.black);
       await SharedPreferencesHelper().setString(PrefsConst.userId, response.result!.userId.toString());
       await SharedPreferencesHelper().setBool(PrefsConst.logInSaved, true);
-      Get.to(()=>userChatListPage());
+      Get.to(()=>HomeScreen());
 
 
     } catch (e) {

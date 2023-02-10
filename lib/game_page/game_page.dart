@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:diamond_chat/game_page/result_page.dart';
-import 'package:diamond_chat/model/user_model.dart';
+import 'package:diamond_chat/model/chat/homepage_response.dart';
 import 'package:diamond_chat/preferance/PrefsConst.dart';
 import 'package:diamond_chat/preferance/pref.dart';
 import 'package:diamond_chat/preferance/sharepreference_helper.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/pagecontroller.dart';
 import '../model/questions_example.dart';
-import '../ui/chat/user_chat_list.dart';
+import '../ui/chat/home_screen.dart';
 import '../ui/login/login.dart';
 
 
@@ -36,7 +36,7 @@ class GamePageScreen extends GetView<gamePageController> {
             ),
             onPressed: ()async {
               final isLogin =await SharedPreferencesHelper().getBool(PrefsConst.logInSaved);
-               Get.off(()=>isLogin??false ?userChatListPage():LoginPage());
+               Get.off(()=>isLogin??false ?HomeScreen():LoginPage());
             //  Navigator.push(context, MaterialPageRoute(builder: (context)=>isLogin??false ?userChatListPage():LoginPage()));
             },
           )

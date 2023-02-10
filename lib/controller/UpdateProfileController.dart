@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'package:diamond_chat/preferance/sharepreference_helper.dart';
-import 'package:diamond_chat/ui/chat/user_chat_list.dart';
+
 import 'package:diamond_chat/ui/login/login.dart';
+import 'package:diamond_chat/ui/profile/update_profile_post_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../preferance/PrefsConst.dart';
 import '../../preferance/pref.dart';
 import '../apimodule/api_service.dart';
+import '../ui/chat/home_screen.dart';
 import '../ui/logout/update_device_id_response.dart';
 import '../ui/profile/user_profile.dart';
 import '../utils/constant.dart';
@@ -27,10 +30,10 @@ class UpdateProfileController extends GetxController {
 
     super.onInit();
     setProfileData();
+
   }
 
   void setProfileData() async {
-
       final path = await SharedPreferencesHelper().getString(PrefsConst.PROFILEPATH);
     if(path!=null){
       image = File(path);
@@ -48,18 +51,12 @@ class UpdateProfileController extends GetxController {
   }
 
   void checkProfile() async{
-    // final isValid = profileFormKey.currentState!.validate();
-    // if (isValid) {
-    print("adadsdas "+image!.path.toString());
       if(image!=null){
         await SharedPreferencesHelper().setString(PrefsConst.PROFILEPATH, image!.path);
-     //   getProfile();
+        updateProfilePostData();
       }
-      Get.back();
+      Get.offAll(()=>HomeScreen());
 
-
-    // }
-   // profileFormKey.currentState!.save();
   }
 
   void imgFromCamera() async {
@@ -79,20 +76,39 @@ class UpdateProfileController extends GetxController {
   
   /*TODO Logout TODO*/
   Future<void> updateDeviceIdData() async {
-  //  try {
+    try {
       final UpdateDeviceId response = await ApiService.updateDeviceId();
       Get.snackbar("Logout Successfully", "${response.message}",
           backgroundColor: Colors.white,
           colorText: Colors.black);
-         Get.to(()=>LoginPage());
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      await pref.clear();
+
+         Get.offAll(()=>LoginPage());
          update();
 
-    // } catch (e) {
-    //   print(e.toString());
-    //   // Get.snackbar("Logout Successfully", 'Failed To Update Device Id!',
-    //   //     backgroundColor: Colors.white,
-    //   //     colorText: Colors.black);
-    //   // Handle exception
-    // }
+    } catch (e) {
+      print(e.toString());
+      // Get.snackbar("Logout Successfully", 'Failed To Update Device Id!',
+      //     backgroundColor: Colors.white,
+      //     colorText: Colors.black);
+      // Handle exception
+    }
+  }
+
+  Future<void> updateProfilePostData() async {
+    try {
+      final UpdateProfilePost response = await ApiService.updateProfilePost(File(image!.absolute.path));
+      Get.snackbar("Profile Change Successfully", "${response.message}",
+          backgroundColor: Colors.white,
+          colorText: Colors.black);
+      update();
+    } catch (e) {
+      print(e.toString());
+      Get.snackbar("Data Unsuccessfully", 'Failed To Update Device Id!',
+          backgroundColor: Colors.white,
+          colorText: Colors.black);
+      // Handle exception
+    }
   }
 }

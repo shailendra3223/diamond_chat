@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 import '../../controller/login_controller.dart';
-import '../chat/user_chat_list.dart';
+import '../chat/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   String? _email, _password;
   String deviceid = "";
   final auth = LocalAuthentication();
+
   @override
   void initState() {
     // _checkBiometric();

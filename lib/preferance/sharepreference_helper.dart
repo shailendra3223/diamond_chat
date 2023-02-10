@@ -31,4 +31,6 @@ class SharedPreferencesHelper {
     final SharedPreferences prefs = await _prefs;
     return prefs.getBool(key);
   }
+
+
 }
