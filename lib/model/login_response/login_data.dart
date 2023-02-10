@@ -7,7 +7,7 @@ class LoginResponse {
 
   LoginResponse.fromJson(Map<String, dynamic> json) {
     result =
-    json['result'] != null ? new Result.fromJson(json['result']) : null;
+    json['result'] != null ?  Result.fromJson(json['result']) : null;
     status = json['status'];
     message = json['message'];
   }

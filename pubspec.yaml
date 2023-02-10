@@ -41,6 +41,13 @@ dependencies:
   edge_alert: ^0.0.1
   http: ^0.13.3
   wc_form_validators: ^0.1.1
+  platform_device_id: ^1.0.1
+  shared_preferences: ^2.0.15
+  image_picker: ^0.8.5+3
+  file_utils: ^1.0.1
+  local_auth: ^1.1.10
+  fluttertoast: ^8.1.2
+  intl: ^0.17.0
   get:
   dio:
 
@@ -76,6 +83,7 @@ flutter:
   - assets/animation_result.gif
   - assets/img/logo.jpg
   - assets/img/wrong_answer.gif
+  - assets/img/man.png
 
 
 
