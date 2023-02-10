@@ -137,7 +137,6 @@ class ChatController extends GetxController{
       setLoading(true);
       final DeleteSingleChatResponse response = await ApiService.mobileForwardChat(chatId,userChatId);
       print(response.message);
-      chatUserWiseController.userChatWiseData(chatUserId);
       Get.back();
       update();
       setLoading(false);
@@ -188,6 +187,7 @@ class ChatController extends GetxController{
    forwardChatUserResponse!.result![index].isSelected =!forwardChatUserResponse!.result![index].isSelected!;
    update();
   }
+
   void selectUserListItem(int index){
     items!.result![index].isSelected =!items!.result![index].isSelected!;
     if(items!.result![index].isSelected!){
@@ -198,11 +198,11 @@ class ChatController extends GetxController{
 
   }
 
-  void forwardMessage(int chatID,String message){
-   final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
-   final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
-  // saveChat(chatID, list.join(','),message);
-   forwardMessageList(chatID,list.join(','));
+  void forwardMessage(int chatID){
+    final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
+    final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
+    // saveChat(chatID, list.join(','),message);
+    forwardMessageList(chatID,list.join(','));
    // Get.back();
   }
 

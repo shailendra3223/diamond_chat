@@ -28,7 +28,7 @@ class ForwordUserListChat extends StatelessWidget {
                 icon: const Icon(Icons.send),
                 color: Colors.white,
                 onPressed: () {
-                  value.forwardMessage(chatID,value.items!.message.toString());
+                  value.forwardMessage(chatID);
                   //value.refreshPage();
                 },
               );
@@ -82,7 +82,7 @@ class ForwordUserListChat extends StatelessWidget {
                               //   width: 30,
                               // ),
                             ):Container(),
-                           const Positioned(
+                           data.isSelected!?const Positioned(
                               bottom: 4,
                               right: 5,
                               child: CircleAvatar(
@@ -95,7 +95,7 @@ class ForwordUserListChat extends StatelessWidget {
                                 ),
                               ),
                             )
-                               //:Container()
+                               :Container()
                           ],
                         ),
                       ),
