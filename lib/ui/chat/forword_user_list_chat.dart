@@ -29,8 +29,7 @@ class ForwordUserListChat extends StatelessWidget {
                 color: Colors.white,
                 onPressed: () {
                   value.forwardMessage(chatID,value.items!.message.toString());
-
-                  value.refreshPage();
+                  //value.refreshPage();
                 },
               );
             },
@@ -74,7 +73,7 @@ class ForwordUserListChat extends StatelessWidget {
                         height: 53,
                         child: Stack(
                           children: [
-                            data.profileImgPath!.isNotEmpty?CircleAvatar(
+                            data.profileImgPath!.isNotEmpty&&data.profileImgPath!=null?CircleAvatar(
                               radius: 23,
                               backgroundColor: Colors.blueGrey[200],
                               backgroundImage: NetworkImage(data.profileImgPath.toString()),
@@ -83,7 +82,7 @@ class ForwordUserListChat extends StatelessWidget {
                               //   width: 30,
                               // ),
                             ):Container(),
-                            data.isSelected!?const Positioned(
+                            value.selected[index]!?const Positioned(
                               bottom: 4,
                               right: 5,
                               child: CircleAvatar(
