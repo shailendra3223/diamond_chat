@@ -82,7 +82,7 @@ class ForwordUserListChat extends StatelessWidget {
                               //   width: 30,
                               // ),
                             ):Container(),
-                            value.selected[index]!?const Positioned(
+                           const Positioned(
                               bottom: 4,
                               right: 5,
                               child: CircleAvatar(
@@ -94,7 +94,8 @@ class ForwordUserListChat extends StatelessWidget {
                                   size: 18,
                                 ),
                               ),
-                            ):Container()
+                            )
+                               //:Container()
                           ],
                         ),
                       ),

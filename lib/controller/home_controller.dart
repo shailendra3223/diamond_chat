@@ -28,9 +28,8 @@ class ChatController extends GetxController{
   int selectedIndex = -1;
   bool isSelected = false;
   ChatUserWiseController chatUserWiseController = new ChatUserWiseController();
-  List<bool> selected = [false];
+  bool isLoading = true;
   File? image;
-  bool isLoading = false;
   bool chatSelected = false;
   dynamic chatId;
 
@@ -47,14 +46,15 @@ class ChatController extends GetxController{
   }
 
   void setProfileData() async {
-    final path = await SharedPreferencesHelper().getString(
-        PrefsConst.PROFILEPATH);
-    if (path != null) {
+
+    final path = await SharedPreferencesHelper().getString(PrefsConst.PROFILEPATH);
+    if(path!=null){
       image = File(path);
       getProfile();
 
       update();
-  }
+    }
+
   }
   void setLoading(bool value){
     isLoading = value;
@@ -64,8 +64,6 @@ class ChatController extends GetxController{
 
   void refreshPage() {
     update(["refresh"]);
-    print(forwardChatUserResponse!.result!.length);
-
   }
 
 
@@ -92,9 +90,10 @@ class ChatController extends GetxController{
       var responseList = await ApiService.userList();
       if(responseList.result!=null){
         items=responseList;
-               update();
+        update();
         setLoading(false);
       }
+      print(responseList);
     }catch(e){
       setLoading(false);
     }
@@ -107,14 +106,10 @@ class ChatController extends GetxController{
       var response = await ApiService.getForwardCharUserList();
       if(response.result!=null){
         forwardChatUserResponse=response;
-        print("inside this function");
-        for(int i=0;i<forwardChatUserResponse!.result!.length;i++){
-          selected.add(false);
-          update();
-        }
         update();
         setLoading(false);
       }
+      print(response);
     }catch(e){
       setLoading(false);
     }
@@ -143,9 +138,6 @@ class ChatController extends GetxController{
       final DeleteSingleChatResponse response = await ApiService.mobileForwardChat(chatId,userChatId);
       print(response.message);
       chatUserWiseController.userChatWiseData(chatUserId);
-      Get.off(HomePage());
-
-
       Get.back();
       update();
       setLoading(false);
@@ -193,11 +185,8 @@ class ChatController extends GetxController{
   }
 
   void selectItem(int index) {
-    for(var item in selected){
-      selected[index] = !item;
-      update();
-    }
-   // forwardChatUserResponse!.result![index].isSelected =!forwardChatUserResponse!.result![index].isSelected!;
+   forwardChatUserResponse!.result![index].isSelected =!forwardChatUserResponse!.result![index].isSelected!;
+   update();
   }
   void selectUserListItem(int index){
     items!.result![index].isSelected =!items!.result![index].isSelected!;
@@ -209,27 +198,12 @@ class ChatController extends GetxController{
 
   }
 
-  void forwardMessage(int chatUserId,String message){
-
-
-    final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
-  void forwardMessage(int chatID,String chatUserID){
+  void forwardMessage(int chatID,String message){
    final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
    final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
   // saveChat(chatID, list.join(','),message);
    forwardMessageList(chatID,list.join(','));
-
-    Get.back();
-   chatUserWiseController.userChatWiseData(int.parse(chatUserID));
-   forwardMessageList(chatUserId,list.join(','));
-    for(int i=0;i<forwardChatUserResponse!.result!.length;i++){
-      selected.removeAt(i);
-      selected.add(false);
-      update();
-    }
-    chatUserWiseController.userChatWiseData(chatUserId);
-
-    Get.back();
+   // Get.back();
   }
 
   void deleteAll(int iondex){
