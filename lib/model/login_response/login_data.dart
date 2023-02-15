@@ -24,13 +24,14 @@ class LoginResponse {
 }
 
 class Result {
-  Null? userNameId;
-  Null? userPassword;
-  Null? deviceId;
+  String? userNameId;
+  String? userPassword;
+  String? deviceId;
   int? userId;
   String? userName;
   bool? isCustomer;
   int? userRoleID;
+  String? profileImgPath;
 
   Result(
       {this.userNameId,
@@ -39,7 +40,8 @@ class Result {
         this.userId,
         this.userName,
         this.isCustomer,
-        this.userRoleID});
+        this.userRoleID,
+        this.profileImgPath});
 
   Result.fromJson(Map<String, dynamic> json) {
     userNameId = json['userNameId'];
@@ -49,6 +51,7 @@ class Result {
     userName = json['userName'];
     isCustomer = json['isCustomer'];
     userRoleID = json['userRoleID'];
+    profileImgPath = json['profileImgPath'];
   }
 
   Map<String, dynamic> toJson() {
@@ -60,6 +63,7 @@ class Result {
     data['userName'] = this.userName;
     data['isCustomer'] = this.isCustomer;
     data['userRoleID'] = this.userRoleID;
+    data['profileImgPath'] = this.profileImgPath;
     return data;
   }
 }

@@ -1,34 +1,30 @@
 
 import 'package:diamond_chat/model/chat/forward_chat_user_response.dart';
-import 'package:diamond_chat/model/chat/homepage_response.dart';
 import 'package:diamond_chat/ui/chat/chat_screen.dart';
+import 'package:diamond_chat/ui/chat/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controller/home_controller.dart';
 
 class ForwordUserListChat extends StatelessWidget {
-  final ChatController _controller = Get.put(ChatController());
+  final HomeController _controller = Get.put(HomeController());
   int chatID;
    ForwordUserListChat({super.key,required this.chatID});
-  List<ForwardChatUserResponse> groupmember = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title:const Center(child:  Text("Diamond chat ")),
         actions: <Widget>[
-          GetBuilder<ChatController>(
+          GetBuilder<HomeController>(
             builder: (value){
-              // if (value.isLoading) {
-              //   return const Center(
-              //     child: CircularProgressIndicator(),
-              //   );
-              // }
               return   IconButton(
                 icon: const Icon(Icons.send),
                 color: Colors.white,
                 onPressed: () {
                   value.forwardMessage(chatID);
+               Get.offAll(()=>HomeScreen());
                   //value.refreshPage();
                 },
               );
@@ -37,7 +33,7 @@ class ForwordUserListChat extends StatelessWidget {
           )
 
         ],),
-        body: GetBuilder<ChatController>(
+        body: GetBuilder<HomeController>(
           init: _controller,
           builder: (value) {
             if (value.isLoading) {
@@ -82,7 +78,7 @@ class ForwordUserListChat extends StatelessWidget {
                               //   width: 30,
                               // ),
                             ):Container(),
-                           data.isSelected!?const Positioned(
+                           value.selected[index]?const Positioned(
                               bottom: 4,
                               right: 5,
                               child: CircleAvatar(

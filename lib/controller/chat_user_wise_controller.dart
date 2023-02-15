@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:diamond_chat/model/chat/chat_data_user_wise.dart';
 import 'package:diamond_chat/model/chat/delete_single_chat.dart';
 import 'package:flutter/foundation.dart';
@@ -6,35 +9,57 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 import '../apimodule/api_service.dart';
+import '../model/chat/save_chat_response.dart';
 import '../preferance/PrefsConst.dart';
 import '../preferance/sharepreference_helper.dart';
 
 class ChatUserWiseController extends GetxController{
   List<ChatListUserWiseModel> chatDataUser = [];
-  List<DeleteSingleChatResponse> deleteChat = [];
+  List<CommonChatResponse> deleteChat = [];
   dynamic chatUserId;
   dynamic chatId;
   // int selectedIndex = -1;
   bool chatSelected = false;
-
+  List<SaveChatResponse> saveChatResponse = [];
+  File? image;
   bool isLoading = true;
+  final textFieldText = "".obs;
+  Timer? timer;
+
   @override
   void onInit() {
     // TODO: implement onInit
     chatUserId = Get.arguments;
     userChatWiseData(chatUserId);
     chatId = Get.arguments;
-    update();
-    print(chatUserId.toString()+'===========================');
 
+  //  timer = Timer.periodic(const Duration(seconds: 5), (Timer t) =>  userChatWiseData(chatUserId));
+
+    update();
     super.onInit();
   }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
 
   void setLoading(bool value){
     isLoading = value;
     update();
 
   }
+
+  void updateText(String newText) {
+    textFieldText.value = newText;
+  }
+
+  void refreshPage() {
+    update(["refresh"]);
+  }
+
   void updateChatSelected(){
     for (var element in chatDataUser) {
       print('selected is '+element.isSelected.toString());
@@ -47,14 +72,16 @@ class ChatUserWiseController extends GetxController{
       update();
     }
   }
-
+  /*TODO userChatWiseData TODO*/
   Future<void> userChatWiseData(int chatUserId) async {
     try {
       setLoading(true);
       final ChatDataUserWise response = await ApiService.chatUserWise(chatUserId);
       chatDataUser = response.result!.chatListUserWiseModel!;
+      if(chatDataUser.isNotEmpty){
+        setLoading(false);
+      }
       update();
-      setLoading(false);
 
     } catch (e) {
       print(e.toString());
@@ -69,7 +96,7 @@ class ChatUserWiseController extends GetxController{
   Future<void> deleteChatData(String chatId) async {
     try {
       setLoading(true);
-      final DeleteSingleChatResponse deleteSingleChatResponse = await ApiService.deleteChat(chatId);
+      final CommonChatResponse deleteSingleChatResponse = await ApiService.deleteChat(chatId);
       Get.snackbar("Delete Message Successfully", deleteSingleChatResponse.message.toString(),
           backgroundColor: Colors.white,
           colorText: Colors.black);
@@ -85,6 +112,37 @@ class ChatUserWiseController extends GetxController{
     }
   }
 
+
+  /*TODO------------------- Save Chat -------------------TODO*/
+  Future<void> saveChat(int userChatId, String message) async {
+    try {
+      setLoading(true);
+      final SaveChatResponse response = await ApiService.saveChatData(
+       userChatId, message);
+      // File(image!.absolute.path)
+      saveChatResponse.add(response);
+      if(response.status==200){
+        userChatWiseData(chatUserId);
+      }
+
+      setLoading(false);
+      update();
+    } catch (e) {
+      print(e.toString());
+      setLoading(false);
+
+      // Handle exception
+    }
+  }
+
+  void sendMessage(String message) {
+  //  final selectedDeleteList =
+  //  saveChatResponse.where((element) => element.isSelected!);
+  //   final List<int> chatUserid =
+  //   chatDataUser.map((e) => e.chatUserId!).toList()
+    saveChat(chatUserId,message);
+   update();
+  }
 
   void updateColor(List<ChatListUserWiseModel> chatData,Color color) {
 

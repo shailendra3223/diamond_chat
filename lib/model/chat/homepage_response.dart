@@ -1,11 +1,11 @@
-class HomePage {
+class HomePageResponse {
   List<Result>? result;
   int? status;
   String? message;
 
-  HomePage({this.result, this.status, this.message});
+  HomePageResponse({this.result, this.status, this.message});
 
-  HomePage.fromJson(Map<String, dynamic> json) {
+  HomePageResponse.fromJson(Map<String, dynamic> json) {
     if (json['result'] != null) {
       result = <Result>[];
       json['result'].forEach((v) {

@@ -4,6 +4,7 @@ class PrefsConst {
   static const String userId = "userid";
   static const String deviceId = "deviceid";
   static const String PROFILEPATH = "profilepath";
+  static const String username = "username";
 
 
 

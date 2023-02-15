@@ -34,8 +34,9 @@ import '../utils/constantBaseUrl.dart';
         "UserPassword": "$userPassword",
         "DeviceId": "$deviceId"
       };
+      print('loginResponse $body');
       var response = await _dioClient.post('${ConstantBaseUrl.baseurl}chat/Login',data: body);
-      print('login $response');
+      print('loginResponse $response');
       if (response["message"] == Constant.SUCCESS) {
         return LoginResponse.fromJson(response);
       }
@@ -51,14 +52,35 @@ import '../utils/constantBaseUrl.dart';
   }
 
   /*TODO-------------------  Chat user List -------------------TODO*/
-  static Future<HomePage> userList() async {
+  static Future<HomePageResponse> userList() async {
     try {
       final userId = await SharedPreferencesHelper().getString(PrefsConst.userId);
       var response = await _dioClient.get('${ConstantBaseUrl.baseurl}chat/GetChatList',queryParameters: {"userID":userId.toString()});
       print("userList $response");
       print(response["message"]);
       if (response["message"] == Constant.SUCCESS) {
-        return HomePage.fromJson(response);
+        return HomePageResponse.fromJson(response);
+      }
+      else{
+        throw Exception('No data Found');
+      }
+    } on Error catch (e) {
+      if (kDebugMode) {
+        print('Error: $e');
+      }
+      throw Exception(e);
+    }
+  }
+
+  /*TODO-------------------  GetNotificationCount -------------------TODO*/
+  static Future<CommonChatResponse> getNotification() async {
+    try {
+      final userId = await SharedPreferencesHelper().getString(PrefsConst.userId);
+      var response = await _dioClient.get('${ConstantBaseUrl.baseurl}chat/GetNotificationCount',queryParameters: {"userID":userId.toString()});
+      print("getNotification $response");
+      print(response["message"]);
+      if (response["message"] == Constant.SUCCESS) {
+        return CommonChatResponse.fromJson(response);
       }
       else{
         throw Exception('No data Found');
@@ -93,13 +115,13 @@ import '../utils/constantBaseUrl.dart';
   }
 
   /*TODO------------------- Forward Chat Data user Wise -------------------TODO*/
-  static Future<ChatDataUserWise> chatUserWise(dynamic chatId) async {
-    print(chatId);
+  static Future<ChatDataUserWise> chatUserWise(dynamic chatUserId) async {
+    print(chatUserId);
     try {
       final body = {
         'userId': await SharedPreferencesHelper().getString(PrefsConst.userId),
         "pageNumber":"1",
-        "chatUserId":chatId,
+        "chatUserId":chatUserId,
 
       };
       var response = await _dioClient.post('${ConstantBaseUrl.baseurl}chat/GetChatUserWise',data: body);
@@ -124,7 +146,7 @@ import '../utils/constantBaseUrl.dart';
   static Future<UserProfile> geUserProfile() async {
     try {
       final userId = await SharedPreferencesHelper().getString(PrefsConst.userId);
-      var response = await _dioClient.get('${ConstantBaseUrl.baseurl}chat/GetMobileProfileImg?userId=${userId.toString()}');
+      var response = await _dioClient.get('${ConstantBaseUrl.baseurl}chat/GetMobileProfileImg',queryParameters: {"userID":userId.toString()});
       if (kDebugMode) {
         print("hdasdasdad "+response);
       }
@@ -203,15 +225,15 @@ import '../utils/constantBaseUrl.dart';
    }
 
    /*TODO Save Chat TODO*/
-  static Future<SaveChatResponse> saveChatData(File file,int chatId,String userChatId,String message) async {
-    String fileName = file.path.split('/').last;
+  static Future<SaveChatResponse> saveChatData(int userChatId,String message) async {
+   // String fileName = file.path.split('/').last;
 
     try {
       FormData formData =  FormData.fromMap({
         'UserId': await SharedPreferencesHelper().getString(PrefsConst.userId),
         // 'FileData':await MultipartFile.fromFile(file.path,
         //     filename: fileName),
-        "ChatId":chatId,
+       // "ChatId":chatId,
         "ChatUserId":userChatId,
          "Message":message,
       });
@@ -254,7 +276,7 @@ import '../utils/constantBaseUrl.dart';
     }
   }
   /*TODO------------------- updateDeviceId -------------------TODO*/
-  static Future<DeleteSingleChatResponse> deleteChat(String chatId) async {
+  static Future<CommonChatResponse> deleteChat(String chatId) async {
     try {
       final body = {
         'userId': await SharedPreferencesHelper().getString(PrefsConst.userId),
@@ -264,7 +286,7 @@ import '../utils/constantBaseUrl.dart';
       var response = await _dioClient.post('${ConstantBaseUrl.baseurl}chat/DeleteChat',data: body);
 
       if (response["message"] == Constant.SUCCESS) {
-        return DeleteSingleChatResponse.fromJson(response);
+        return CommonChatResponse.fromJson(response);
       }
       else{
         throw Exception('Failed To Update Device Id!');
@@ -276,7 +298,7 @@ import '../utils/constantBaseUrl.dart';
   }
 
   /*TODO------------------- updateDeviceId -------------------TODO*/
-  static Future<DeleteSingleChatResponse> mobileForwardChat(int chatId,String chatUserId) async {
+  static Future<CommonChatResponse> mobileForwardChat(int chatId,dynamic chatUserId) async {
     try {
       final body = {
         'userId': await SharedPreferencesHelper().getString(PrefsConst.userId),
@@ -288,7 +310,7 @@ import '../utils/constantBaseUrl.dart';
       var response = await _dioClient.post('${ConstantBaseUrl.baseurl}chat/MobileForwandChat',data: body);
 
       if (response["message"] == Constant.SUCCESS) {
-        return DeleteSingleChatResponse.fromJson(response);
+        return CommonChatResponse.fromJson(response);
       }
       else{
         throw Exception('Failed To Update Device Id!');

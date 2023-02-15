@@ -17,6 +17,8 @@ import '../ui/chat/home_screen.dart';
 
 class LoginController extends GetxController {
   var isLoggedIn = false.obs;
+  var profileIcon;
+  var username;
   @override
   void onInit() {
     // TODO: implement onInit
@@ -33,9 +35,14 @@ class LoginController extends GetxController {
           backgroundColor: Colors.white,
           colorText: Colors.black);
       await SharedPreferencesHelper().setString(PrefsConst.userId, response.result!.userId.toString());
+      await SharedPreferencesHelper().setString(PrefsConst.PROFILEPATH, response.result!.profileImgPath.toString());
+      await SharedPreferencesHelper().setString(PrefsConst.username, response.result!.userName.toString());
       await SharedPreferencesHelper().setBool(PrefsConst.logInSaved, true);
+     /* profileIcon = response.result!.profileImgPath.toString();
+      username = response.result!.userName.toString();*/
+    //  Get.to(()=>HomeScreen(profileIcon: response.result!.profileImgPath.toString(),));
       Get.to(()=>HomeScreen());
-
+      update();
 
     } catch (e) {
       print(e.toString());

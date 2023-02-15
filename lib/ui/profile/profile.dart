@@ -54,7 +54,6 @@ class ProfilePage extends GetView {
                       width: 80,
                       child: CircleAvatar(
                         backgroundImage: FileImage(value.image!,
-
                         ),
                         ),
                     ),

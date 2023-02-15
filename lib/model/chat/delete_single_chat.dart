@@ -1,11 +1,11 @@
-class DeleteSingleChatResponse {
+class CommonChatResponse {
   int? result;
   int? status;
   String? message;
 
-  DeleteSingleChatResponse({this.result, this.status, this.message});
+  CommonChatResponse({this.result, this.status, this.message});
 
-  DeleteSingleChatResponse.fromJson(Map<String, dynamic> json) {
+  CommonChatResponse.fromJson(Map<String, dynamic> json) {
     result = json['result'];
     status = json['status'];
     message = json['message'];
