@@ -1,4 +1,4 @@
-package com.example.diamond_chat;
+package com.diamond.quizApp;
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity() : FlutterActivity() {

@@ -225,19 +225,33 @@ import '../utils/constantBaseUrl.dart';
    }
 
    /*TODO Save Chat TODO*/
-  static Future<SaveChatResponse> saveChatData(int userChatId,String message) async {
-   // String fileName = file.path.split('/').last;
-
+  static Future<SaveChatResponse> saveChatData(int userChatId,String message,{File? file}) async {
+    String fileName = "";
+    if(file!=null){
+      fileName = file!.path.split('/').last;
+    }
+    FormData formData;
     try {
-      FormData formData =  FormData.fromMap({
-        'UserId': await SharedPreferencesHelper().getString(PrefsConst.userId),
-        // 'FileData':await MultipartFile.fromFile(file.path,
-        //     filename: fileName),
-       // "ChatId":chatId,
-        "ChatUserId":userChatId,
-         "Message":message,
-      });
-      print(formData);
+      if(fileName!=""){
+         formData =  FormData.fromMap({
+          'UserId': await SharedPreferencesHelper().getString(PrefsConst.userId),
+          'FileData':await MultipartFile.fromFile(file!.path,
+              filename: fileName),
+          // "ChatId":chatId,
+          "ChatUserId":userChatId,
+          "Message":message,
+        });
+      }else{
+         formData =  FormData.fromMap({
+          'UserId': await SharedPreferencesHelper().getString(PrefsConst.userId),
+          // 'FileData':await MultipartFile.fromFile(file.path,
+          //     filename: fileName),
+          // "ChatId":chatId,
+          "ChatUserId":userChatId,
+          "Message":message,
+        });
+      }
+
 
       var response = await _dioClient.post('${ConstantBaseUrl.baseurl}chat/SaveChat',data: formData);
       print('SaveChatResponse $response');

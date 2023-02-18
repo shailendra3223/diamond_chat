@@ -3,15 +3,19 @@ import 'dart:io';
 
 import 'package:diamond_chat/model/chat/chat_data_user_wise.dart';
 import 'package:diamond_chat/model/chat/delete_single_chat.dart';
+import 'package:diamond_chat/ui/camera_screen/camera_screen_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../apimodule/api_service.dart';
 import '../model/chat/save_chat_response.dart';
 import '../preferance/PrefsConst.dart';
 import '../preferance/sharepreference_helper.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../utils/constantBaseUrl.dart';
 
 class ChatUserWiseController extends GetxController{
   List<ChatListUserWiseModel> chatDataUser = [];
@@ -21,22 +25,52 @@ class ChatUserWiseController extends GetxController{
   // int selectedIndex = -1;
   bool chatSelected = false;
   List<SaveChatResponse> saveChatResponse = [];
-  File? image;
   bool isLoading = true;
   final textFieldText = "".obs;
   Timer? timer;
+  final ScrollController scrollController = ScrollController();
+  IO.Socket? socket;
+  bool show = false;
+  final ImagePicker imagePicker = ImagePicker();
+  File? image;
+  bool imageSet = false;
 
   @override
   void onInit() {
     // TODO: implement onInit
+
+    super.onInit();
     chatUserId = Get.arguments;
     userChatWiseData(chatUserId);
     chatId = Get.arguments;
 
-  //  timer = Timer.periodic(const Duration(seconds: 5), (Timer t) =>  userChatWiseData(chatUserId));
-
+    timer = Timer.periodic(const Duration(seconds: 2), (Timer t) =>  userChatWiseData(chatUserId));
+    connect();
     update();
-    super.onInit();
+  }
+
+  void connect() {
+    // MessageModel messageModel = MessageModel(sourceId: widget.sourceChat.id.toString(),targetId: );
+    socket = IO.io("http://192.168.0.106:5000", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
+    socket!.connect();
+    socket!.emit("message", chatUserId);
+    socket!.onConnect((data) {
+      print("Connected");
+      socket!.on("message", (msg) {
+        print(msg);
+        userChatWiseData(chatUserId);
+        scrollController.animateTo(scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        update();
+      });
+    });
+    if (kDebugMode) {
+      print(socket!.connected);
+    }
+    update();
   }
 
   @override
@@ -52,6 +86,32 @@ class ChatUserWiseController extends GetxController{
 
   }
 
+   setShow(bool value){
+    show = value;
+    update();
+
+  }
+/*TODO------------- Camera and Gallery Add  ------------------TODO*/
+  void imgFromGallery() async {
+    XFile? img = await imagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50);
+    Get.to(()=>CameraViewPage(path: img!.path,));
+    update();
+  }
+
+  void imgFromCamera() async {
+    XFile? img = await imagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 50);
+    if(img!.path.isNotEmpty){
+      image = File(img.path);
+    }
+
+      update();
+  }
+
+  /*TODO------------- Camera and Gallery End  ------------------TODO*/
+
+  /*TODO------------- updateText  ------------------TODO*/
   void updateText(String newText) {
     textFieldText.value = newText;
   }
@@ -77,12 +137,20 @@ class ChatUserWiseController extends GetxController{
     try {
       setLoading(true);
       final ChatDataUserWise response = await ApiService.chatUserWise(chatUserId);
-      chatDataUser = response.result!.chatListUserWiseModel!;
-      if(chatDataUser.isNotEmpty){
-        setLoading(false);
+      List<ChatListUserWiseModel> list = response.result!.chatListUserWiseModel!;
+      for(int i =0; i<chatDataUser.length;i++){
+        if(i<list.length){
+          if(chatDataUser[i].chatId==list[i].chatId){
+            list[i].isSelected= chatDataUser[i].isSelected!;
+          }
+        }
       }
+      chatDataUser = list;
+      // if(chatDataUser.isNotEmpty){
+      //
+      // }
       update();
-
+      setLoading(false);
     } catch (e) {
       print(e.toString());
       setLoading(false);
@@ -114,17 +182,21 @@ class ChatUserWiseController extends GetxController{
 
 
   /*TODO------------------- Save Chat -------------------TODO*/
-  Future<void> saveChat(int userChatId, String message) async {
+  Future<void> saveChat(int userChatId, String message,{File? file}) async {
+    print(userChatId);
+    print(file);
+    print("------------------------");
     try {
       setLoading(true);
       final SaveChatResponse response = await ApiService.saveChatData(
-       userChatId, message);
+       userChatId, message,file: file);
+
       // File(image!.absolute.path)
       saveChatResponse.add(response);
-      if(response.status==200){
-        userChatWiseData(chatUserId);
-      }
-
+      // if(response.status==200){
+      //
+      // }
+      userChatWiseData(chatUserId);
       setLoading(false);
       update();
     } catch (e) {
@@ -135,12 +207,12 @@ class ChatUserWiseController extends GetxController{
     }
   }
 
-  void sendMessage(String message) {
-  //  final selectedDeleteList =
-  //  saveChatResponse.where((element) => element.isSelected!);
-  //   final List<int> chatUserid =
-  //   chatDataUser.map((e) => e.chatUserId!).toList()
-    saveChat(chatUserId,message);
+  void sendMessage(String message,{File? file}) {
+
+    saveChat(chatUserId,message,file: file);
+    socket!.emit("message",
+        {"message": message, "chatUserId": chatUserId,});
+
    update();
   }
 

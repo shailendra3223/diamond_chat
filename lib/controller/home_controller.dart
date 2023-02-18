@@ -33,15 +33,29 @@ class HomeController extends GetxController {
   dynamic chatId;
   Timer? timer;
 
+  String? profileIcon='';
+  String? username = "";
+
   @override
   void onInit() {
     // TODO: implement onInit
-    getUserDetails();
 
-    getUserForwardChatList();
    // timer = Timer.periodic(const Duration(seconds: 10), (Timer t) =>    getNotificationCount());
-    update();
+
     super.onInit();
+    getUserDetails(true);
+
+    getUserForwardChatList(true);
+    getSharedPreferenceData();
+    update();
+  }
+
+  void getSharedPreferenceData() async{
+    profileIcon =await SharedPreferencesHelper().getString(PrefsConst.PROFILEPATH);
+    username = await SharedPreferencesHelper().getString(PrefsConst.username);
+
+    print(username!+"=========================");
+    update();
   }
 
   void setProfileData() async {
@@ -63,9 +77,9 @@ class HomeController extends GetxController {
   }
 
   /*TODO------------------- Chat user List -------------------TODO*/
-  void getUserDetails() async {
+  void getUserDetails(bool loading) async {
     try {
-      setLoading(true);
+      setLoading(loading);
       var responseList = await ApiService.userList();
       if (responseList.result != null) {
         items = responseList;
@@ -95,11 +109,17 @@ class HomeController extends GetxController {
     }
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    Get.delete<HomeController>();
+    super.dispose();
+  }
 
   /*TODO------------------- Forward Chat user List -------------------TODO*/
-  void getUserForwardChatList() async {
+  void getUserForwardChatList(bool loading) async {
     try {
-      setLoading(true);
+      setLoading(loading);
       var response = await ApiService.getForwardCharUserList();
       if (response.result != null) {
         forwardChatUserResponse = response;
@@ -142,7 +162,7 @@ class HomeController extends GetxController {
           deleteAllChatResponse.message.toString(),
           backgroundColor: Colors.white, colorText: Colors.black);
       print(deleteAllChatResponse.toString());
-      getUserDetails();
+      getUserDetails(true);
       update();
       setLoading(false);
     } catch (e) {
@@ -155,9 +175,7 @@ class HomeController extends GetxController {
 
   void updateChatSelected() {
     for (var element in items!.result!) {
-      if (kDebugMode) {
-        print('selected is ${element.isSelected}');
-      }
+      print('selected is ' + element.isSelected.toString());
       if (element.isSelected!) {
         chatSelected = true;
         break;
@@ -169,8 +187,8 @@ class HomeController extends GetxController {
   }
 
   void selectItem(int index) {
-    // forwardChatUserResponse!.result![index].isSelected =!forwardChatUserResponse!.result![index].isSelected!;
-    selected[index] = !selected[index];
+     forwardChatUserResponse!.result![index].isSelected =!forwardChatUserResponse!.result![index].isSelected!;
+   /* selected[index] = !selected[index];*/
     update();
   }
 
@@ -184,7 +202,7 @@ class HomeController extends GetxController {
   }
 
   void forwardMessage(int chatID) {
-    for (int i = 0; i < forwardChatUserResponse!.result!.length; i++) {
+   /* for (int i = 0; i < forwardChatUserResponse!.result!.length; i++) {
       for (int i = 0; i < selected.length; i++) {
         if (selected[i]) {
           print(selected[i]);
@@ -197,15 +215,12 @@ class HomeController extends GetxController {
           print("inside else");
         }
       }
-    }
-    // final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
-    // final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
-    // // saveChat(chatID, list.join(','),message);
-    // forwardMessageList(chatID,list.join(','));
-    // for(int i=0;i<forwardChatUserResponse!.result!.length;i++){
-    //   selected.removeAt(i);
-    //   selected.add(false);
-    // }
+    }*/
+    final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
+    final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
+    // saveChat(chatID, list.join(','),message);
+    forwardMessageList(chatID,list.join(','));
+
     // Get.back();
   }
 
@@ -215,5 +230,10 @@ class HomeController extends GetxController {
     final List<int> deleteList =
         selectedDeleteList.map((e) => e.chatUserId!).toList();
     deleteAllChatData(deleteList.join(','));
+  }
+
+  clearList() {
+   final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
+   selectedList.forEach((element) { element.isSelected=false;});
   }
 }

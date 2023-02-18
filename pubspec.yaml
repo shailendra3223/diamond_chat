@@ -50,6 +50,7 @@ dependencies:
   intl: ^0.17.0
   get:
   dio:
+  socket_io_client: ^2.0.1
 
 
 dev_dependencies:
