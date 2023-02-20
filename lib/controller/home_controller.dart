@@ -202,23 +202,8 @@ class HomeController extends GetxController {
   }
 
   void forwardMessage(int chatID) {
-   /* for (int i = 0; i < forwardChatUserResponse!.result!.length; i++) {
-      for (int i = 0; i < selected.length; i++) {
-        if (selected[i]) {
-          print(selected[i]);
-          print(forwardChatUserResponse!.result![i].chatUserID);
-          forwardMessageList(chatID,
-              forwardChatUserResponse!.result![i].chatUserID.toString());
-          selected.removeAt(i);
-          selected.add(false);
-        } else {
-          print("inside else");
-        }
-      }
-    }*/
     final selectedList = forwardChatUserResponse!.result!.where((element) => element.isSelected!);
     final List<int> list = selectedList.map((e) => e.chatUserID!).toList();
-    // saveChat(chatID, list.join(','),message);
     forwardMessageList(chatID,list.join(','));
 
     // Get.back();

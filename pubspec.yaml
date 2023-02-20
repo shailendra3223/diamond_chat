@@ -47,7 +47,12 @@ dependencies:
   file_utils: ^1.0.1
   local_auth: ^1.1.10
   fluttertoast: ^8.1.2
+  file_picker: ^4.0.4
   intl: ^0.17.0
+  flutter_pdfview: ^1.0.2
+  url_launcher: ^6.1.9
+  flutter_downloader: ^1.10.1+2
+  permission_handler: ^10.2.0
   get:
   dio:
   socket_io_client: ^2.0.1

@@ -49,13 +49,18 @@ class ProfilePage extends GetView {
                         color: Colors.white,
                         size: 50.0,
                       ),
-                    ):SizedBox(
+                    ):value.image!=null?Container(
+                      decoration: BoxDecoration(shape: BoxShape.circle,
+                      image: DecorationImage(image: NetworkImage(value.image!.path.toString()))
+                      ),
                       height: 80,
                       width: 80,
-                      child: CircleAvatar(
-                        backgroundImage: FileImage(value.image!,
-                        ),
-                        ),
+                    ):Container(
+                      decoration: BoxDecoration(shape: BoxShape.circle,
+                          image: DecorationImage(image: FileImage(value.image!))
+                      ),
+                      height: 80,
+                      width: 80,
                     ),
                   ),
                   const SizedBox(height: 50),

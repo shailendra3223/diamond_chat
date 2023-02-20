@@ -27,66 +27,61 @@ class UpdateProfileController extends GetxController {
 
   @override
   void onInit() {
-
     super.onInit();
     setProfileData();
-
   }
 
   void setProfileData() async {
-      final path = await SharedPreferencesHelper().getString(PrefsConst.PROFILEPATH);
-    if(path!=null){
+    final path =
+        await SharedPreferencesHelper().getString("profilepath");
+    print(path);
+    print("profile path===================");
+    if (path != null) {
       image = File(path);
 
-
-      update();
     }
-
-  }
-
-  void setLoading(bool value){
-    isLoading = value;
     update();
 
   }
 
-  void checkProfile() async{
-      if(image!=null){
-        await SharedPreferencesHelper().setString(PrefsConst.PROFILEPATH, image!.path);
-        updateProfilePostData();
-      }
-      Get.offAll(()=>HomeScreen());
+  void setLoading(bool value) {
+    isLoading = value;
+    update();
+  }
 
+  void checkProfile() async {
+    if (image != null) {
+      await SharedPreferencesHelper()
+          .setString(PrefsConst.PROFILEPATH, image!.path);
+      updateProfilePostData();
+    }
+    Get.offAll(() => HomeScreen());
   }
 
   void imgFromCamera() async {
-     XFile? img = await imagePicker.pickImage(
+    XFile? img = await imagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50);
     image = File(img!.path);
     update();
   }
 
-  void imgFromGallery() async {
+   void imgFromGallery() async {
     XFile? img = await imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
     image = File(img!.path);
     update();
   }
 
-  
   /*TODO Logout TODO*/
   Future<void> updateDeviceIdData() async {
     try {
       final UpdateDeviceId response = await ApiService.updateDeviceId();
       Get.snackbar("Logout Successfully", "${response.message}",
-          backgroundColor: Colors.white,
-          colorText: Colors.black);
-      SharedPreferences pref = await SharedPreferences.getInstance();
-      await pref.clear();
+          backgroundColor: Colors.white, colorText: Colors.black);
+      removeLoginInstance();
 
-         Get.offAll(()=>LoginPage());
-         update();
-
+      Get.offAll(() => LoginPage());
+      update();
     } catch (e) {
       print(e.toString());
       // Get.snackbar("Logout Successfully", 'Failed To Update Device Id!',
@@ -96,18 +91,25 @@ class UpdateProfileController extends GetxController {
     }
   }
 
+  void removeLoginInstance() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.remove(PrefsConst.userId);
+    await pref.remove(PrefsConst.deviceId);
+    await pref.remove(PrefsConst.logInSaved);
+    // update();
+  }
+
   Future<void> updateProfilePostData() async {
     try {
-      final UpdateProfilePost response = await ApiService.updateProfilePost(File(image!.absolute.path));
+      final UpdateProfilePost response =
+          await ApiService.updateProfilePost(File(image!.absolute.path));
       Get.snackbar("Profile Change Successfully", "${response.message}",
-          backgroundColor: Colors.white,
-          colorText: Colors.black);
+          backgroundColor: Colors.white, colorText: Colors.black);
       update();
     } catch (e) {
       print(e.toString());
       Get.snackbar("Data Unsuccessfully", 'Failed To Update Device Id!',
-          backgroundColor: Colors.white,
-          colorText: Colors.black);
+          backgroundColor: Colors.white, colorText: Colors.black);
       // Handle exception
     }
   }

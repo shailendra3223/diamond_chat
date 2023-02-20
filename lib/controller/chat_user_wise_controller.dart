@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:diamond_chat/model/chat/chat_data_user_wise.dart';
 import 'package:diamond_chat/model/chat/delete_single_chat.dart';
 import 'package:diamond_chat/ui/camera_screen/camera_screen_view.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ import '../model/chat/save_chat_response.dart';
 import '../preferance/PrefsConst.dart';
 import '../preferance/sharepreference_helper.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../ui/camera_screen/pdf_page.dart';
 import '../utils/constantBaseUrl.dart';
 
 class ChatUserWiseController extends GetxController{
@@ -32,8 +34,10 @@ class ChatUserWiseController extends GetxController{
   IO.Socket? socket;
   bool show = false;
   final ImagePicker imagePicker = ImagePicker();
+  List<XFile> imageFileList = [];
   File? image;
   bool imageSet = false;
+  int index = 0;
 
   @override
   void onInit() {
@@ -93,9 +97,25 @@ class ChatUserWiseController extends GetxController{
   }
 /*TODO------------- Camera and Gallery Add  ------------------TODO*/
   void imgFromGallery() async {
+    final List<XFile> selectedImage = await imagePicker.pickMultiImage();
+
+    // if(selectedImage.isNotEmpty){
+    //   if(selectedImage.contains(selectedImage.first)){
+    //     imageFileList.addAll(selectedImage);
+    //     Get.to(()=>CameraViewPage(path: imageFileList,));
+    //   }else {
+    //    // for (int i = 0; i < selectedImage.length; i++) {
+    //       imageFileList.remove(selectedImage.first);
+    //     //}
+    //   }
+    //
+    //   }
     XFile? img = await imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
-    Get.to(()=>CameraViewPage(path: img!.path,));
+    if(img!=null){
+      Get.to(()=>CameraViewPage(path: img.path,));
+    }
+
     update();
   }
 
@@ -104,10 +124,34 @@ class ChatUserWiseController extends GetxController{
         source: ImageSource.camera, imageQuality: 50);
     if(img!.path.isNotEmpty){
       image = File(img.path);
+      Get.to(()=>CameraViewPage(path:img.path,));
     }
 
       update();
   }
+
+  void imgFromPdf() async {
+    // XFile? img = await imagePicker.pickImage(
+    //     source: ImageSource.camera, imageQuality: 50);
+
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['doc', 'docx', 'pdf', 'txt'], // add any document file extensions you want to allow
+    );
+    if (result != null) {
+      File image = File(result.files.single.path!);
+      Get.to(()=>PdfViewerPage(image.path,));
+
+    }
+
+    // if(img!.path.isNotEmpty){
+    //   image = File(img.path);
+    //   Get.to(()=>CameraViewPage(path:img.path,));
+    // }
+
+    update();
+  }
+
 
   /*TODO------------- Camera and Gallery End  ------------------TODO*/
 
@@ -165,9 +209,10 @@ class ChatUserWiseController extends GetxController{
     try {
       setLoading(true);
       final CommonChatResponse deleteSingleChatResponse = await ApiService.deleteChat(chatId);
-      Get.snackbar("Delete Message Successfully", deleteSingleChatResponse.message.toString(),
+    /*  Get.snackbar("Delete Message Successfully", deleteSingleChatResponse.message.toString(),
           backgroundColor: Colors.white,
-          colorText: Colors.black);
+          colorText: Colors.black);*/
+      print(deleteSingleChatResponse);
       userChatWiseData(chatUserId);
       update();
       setLoading(false);
@@ -208,11 +253,9 @@ class ChatUserWiseController extends GetxController{
   }
 
   void sendMessage(String message,{File? file}) {
-
     saveChat(chatUserId,message,file: file);
     socket!.emit("message",
         {"message": message, "chatUserId": chatUserId,});
-
    update();
   }
 
@@ -231,8 +274,6 @@ class ChatUserWiseController extends GetxController{
     if(chatDataUser[index].isSelected!){
       chatId= chatDataUser[index].chatId;
     }
-
-
     updateChatSelected();
 
     update();
