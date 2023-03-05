@@ -25,7 +25,7 @@ class ForwordUserListChat extends GetView {
           builder: (value) {
             return Scaffold(
                 appBar: AppBar(
-                  title: const Center(child: Text("Diamond chat ")),
+                  title: const Center(child: Text("Forward Message ")),
                   actions: <Widget>[
                     IconButton(
                       icon: const Icon(Icons.send),

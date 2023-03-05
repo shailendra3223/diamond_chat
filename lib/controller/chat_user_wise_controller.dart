@@ -1,23 +1,21 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:diamond_chat/model/chat/chat_data_user_wise.dart';
 import 'package:diamond_chat/model/chat/delete_single_chat.dart';
 import 'package:diamond_chat/ui/camera_screen/camera_screen_view.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../apimodule/api_service.dart';
 import '../model/chat/save_chat_response.dart';
-import '../preferance/PrefsConst.dart';
-import '../preferance/sharepreference_helper.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../ui/camera_screen/pdf_page.dart';
 import '../utils/constantBaseUrl.dart';
+import '../utils/firebaseService.dart';
 
 class ChatUserWiseController extends GetxController{
   List<ChatListUserWiseModel> chatDataUser = [];
@@ -39,18 +37,42 @@ class ChatUserWiseController extends GetxController{
   bool imageSet = false;
   int index = 0;
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+   AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    'This channel is used for important notifications.', // description
+    importance: Importance.max,
+  );
   @override
   void onInit() {
     // TODO: implement onInit
 
     super.onInit();
     chatUserId = Get.arguments;
-    userChatWiseData(chatUserId);
+    userChatWiseData(chatUserId,scrollToBottom: true);
     chatId = Get.arguments;
-
+    updateText("");
     timer = Timer.periodic(const Duration(seconds: 2), (Timer t) =>  userChatWiseData(chatUserId));
+    _getToken();
     connect();
     update();
+  }
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  String deviceToken = "cBaR_lDpRRCpaRqtHUVQNR:APA91bEZDyhI8NO8qfBTJpU7ot6mo1hXIHZxI4wCzl_MwkXrYnAPKhweYHVB6sIRwXIwcXBAy1PXVEfw7ZTZyhxY6YGI1JozjjjhgIhmQOVoCwvkqWfN-QmKS0LcoURRHFETA4GAeLk5";
+
+
+
+
+  String _fcmToken ="";
+
+  Future<void> _getToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+
+      _fcmToken = token!;
+    update();
+    print("FCM Token: $_fcmToken");
   }
 
   void connect() {
@@ -99,22 +121,20 @@ class ChatUserWiseController extends GetxController{
   void imgFromGallery() async {
     final List<XFile> selectedImage = await imagePicker.pickMultiImage();
 
-    // if(selectedImage.isNotEmpty){
-    //   if(selectedImage.contains(selectedImage.first)){
-    //     imageFileList.addAll(selectedImage);
-    //     Get.to(()=>CameraViewPage(path: imageFileList,));
-    //   }else {
-    //    // for (int i = 0; i < selectedImage.length; i++) {
-    //       imageFileList.remove(selectedImage.first);
-    //     //}
-    //   }
-    //
-    //   }
-    XFile? img = await imagePicker.pickImage(
+    if(selectedImage.isNotEmpty){
+      if(selectedImage.contains(selectedImage.first)){
+        imageFileList.addAll(selectedImage);
+        Get.to(()=>CameraViewPage(path: selectedImage.map((e) => File(e.path)).toList(),));
+      }else {
+          imageFileList.remove(selectedImage.first);
+      }
+
+      }
+   /* XFile? img = await imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
     if(img!=null){
       Get.to(()=>CameraViewPage(path: img.path,));
-    }
+    }*/
 
     update();
   }
@@ -124,23 +144,20 @@ class ChatUserWiseController extends GetxController{
         source: ImageSource.camera, imageQuality: 50);
     if(img!.path.isNotEmpty){
       image = File(img.path);
-      Get.to(()=>CameraViewPage(path:img.path,));
+      Get.to(()=>CameraViewPage(path:[File(img.path)],));
     }
 
       update();
   }
 
   void imgFromPdf() async {
-    // XFile? img = await imagePicker.pickImage(
-    //     source: ImageSource.camera, imageQuality: 50);
-
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['doc', 'docx', 'pdf', 'txt'], // add any document file extensions you want to allow
     );
     if (result != null) {
       File image = File(result.files.single.path!);
-      Get.to(()=>PdfViewerPage(image.path,));
+      Get.to(()=>CameraViewPage(path:result.files.map((e) => File(e.path!)).toList(),));
 
     }
 
@@ -166,7 +183,7 @@ class ChatUserWiseController extends GetxController{
 
   void updateChatSelected(){
     for (var element in chatDataUser) {
-      print('selected is '+element.isSelected.toString());
+
       if(element.isSelected!){
         chatSelected = true;
         break;
@@ -177,7 +194,7 @@ class ChatUserWiseController extends GetxController{
     }
   }
   /*TODO userChatWiseData TODO*/
-  Future<void> userChatWiseData(int chatUserId) async {
+  Future<void> userChatWiseData(int chatUserId,{bool scrollToBottom=false}) async {
     try {
       setLoading(true);
       final ChatDataUserWise response = await ApiService.chatUserWise(chatUserId);
@@ -189,12 +206,26 @@ class ChatUserWiseController extends GetxController{
           }
         }
       }
+
       chatDataUser = list;
       // if(chatDataUser.isNotEmpty){
       //
       // }
       update();
+
       setLoading(false);
+      if(scrollToBottom){
+        Future.delayed(const Duration(milliseconds: 300),(){
+          scrollController.animateTo(
+              scrollController
+                  .position.maxScrollExtent,
+              duration: const Duration(
+                  milliseconds: 100),
+              curve: Curves.easeOut);
+        });
+      }
+
+
     } catch (e) {
       print(e.toString());
       setLoading(false);
@@ -214,6 +245,7 @@ class ChatUserWiseController extends GetxController{
           colorText: Colors.black);*/
       print(deleteSingleChatResponse);
       userChatWiseData(chatUserId);
+      chatSelected = false;
       update();
       setLoading(false);
 
@@ -227,8 +259,9 @@ class ChatUserWiseController extends GetxController{
 
 
   /*TODO------------------- Save Chat -------------------TODO*/
-  Future<void> saveChat(int userChatId, String message,{File? file}) async {
+  Future<void> saveChat(int userChatId, String message,{List<File>? file}) async {
     print(userChatId);
+    print(message.toString());
     print(file);
     print("------------------------");
     try {
@@ -252,10 +285,37 @@ class ChatUserWiseController extends GetxController{
     }
   }
 
-  void sendMessage(String message,{File? file}) {
+  void sendMessage(String message,{List<File>? file}) async {
     saveChat(chatUserId,message,file: file);
     socket!.emit("message",
         {"message": message, "chatUserId": chatUserId,});
+
+    FirebaseMessagingService().sendNotification('New Message', 'Hello!', deviceToken);
+
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      // If `onMessage` is triggered with a notification, construct our own
+      // local notification to show to users using the created channel.
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                icon: android.smallIcon,
+                // other properties...
+              ),
+            ));
+      }
+    });
+
    update();
   }
 

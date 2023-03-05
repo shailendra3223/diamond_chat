@@ -56,7 +56,13 @@ dependencies:
   get:
   dio:
   socket_io_client: ^2.0.1
-
+  image_gallery_saver: ^1.7.1
+  webview_flutter: ^2.0.14
+  chat_bubbles: ^1.1.0
+  bubble: ^1.2.1
+  firebase_core: ^2.7.0
+  firebase_messaging: ^14.2.5
+  flutter_local_notifications:
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +97,8 @@ flutter:
   - assets/img/wrong_answer.gif
   - assets/img/man.png
   - assets/img/user.png
+  - assets/img/pdf.png
+  - assets/img/doc.png
 
 
 

@@ -7,10 +7,10 @@ import 'package:image_picker/image_picker.dart';
 
 class CameraViewPage extends GetView<ChatUserWiseController> {
   ChatUserWiseController chatUserWiseController = Get.find();
-
+  TextEditingController editingController = TextEditingController();
   CameraViewPage({Key? key, this.path}) : super(key: key);
-  // final List<XFile>? path;
-  String? path;
+   final List<File>? path;
+  //String? path;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +59,7 @@ class CameraViewPage extends GetView<ChatUserWiseController> {
                       height: MediaQuery.of(context).size.height - 150,
                       child: Image.file(
                         // File(path![index].path),
-                        File(path!),
+                        File(path![index].path),
                         fit: BoxFit.cover,
                       ),
                     );
@@ -75,6 +75,7 @@ class CameraViewPage extends GetView<ChatUserWiseController> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 5, horizontal: 8),
                       child: TextFormField(
+                        controller: editingController,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -100,8 +101,10 @@ class CameraViewPage extends GetView<ChatUserWiseController> {
                       onTap: () {
                         if (path!.isNotEmpty) {
                           chatUserWiseController.saveChat(
-                              chatUserWiseController.chatUserId, "",
-                              file: File(path!));
+                              chatUserWiseController.chatUserId,  editingController.text,
+                              file:path!.map((e) =>File(e.path)).toList() );
+
+
                           Get.back();
                           //Get.back();
                         }

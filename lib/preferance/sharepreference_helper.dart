@@ -17,9 +17,9 @@ class SharedPreferencesHelper {
     prefs.setString(key, value);
   }
 
-  Future<String?> getString(String key) async {
+  Future<String> getString(String key) async {
     final SharedPreferences prefs = await _prefs;
-    return prefs.getString(key);
+    return prefs.getString(key)??'';
   }
 
   Future<void> setBool(String key, bool value) async {
